@@ -180,12 +180,6 @@ export default function App() {
                 </button>
               </div>
             </div>
-            
-            <div className="hidden xl:flex items-center gap-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div> Online</span>
-              <span className="border-l border-gray-300 h-4 mx-1"></span>
-              <span>24/7 Support</span>
-            </div>
           </div>
         </div>
       </section>
