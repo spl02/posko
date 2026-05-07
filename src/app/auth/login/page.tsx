@@ -1,58 +1,57 @@
-import { login } from './actions'
+'use client';
 
-export default function LoginPage({
-  searchParams,
-}: {
-  searchParams: { error?: string }
-}) {
+import { useActionState } from 'react';
+import { login } from '../actions';
+
+export default function LoginPage() {
+  const [state, formAction, isPending] = useActionState(login, null);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-lg">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900">Admin Login</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Silakan masuk ke panel kontrol admin
-          </p>
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+      <div className="w-full max-w-md rounded-[2rem] border border-white/20 bg-white/40 p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Selamat Datang, Admin!</h1>
+          <p className="mt-2 text-sm text-slate-500">Silahkan Masukkan kredensial untuk mengakses dasbor.</p>
         </div>
 
-        <form action={login} className="mt-8 space-y-6">
-          {searchParams.error && (
-            <div className="rounded bg-red-50 p-3 text-sm text-red-500 border border-red-200">
-              {searchParams.error}
+        <form action={formAction} className="space-y-6">
+          {state?.error && (
+            <div className="rounded-xl border border-red-100 bg-red-50/50 p-4 text-sm text-red-600 backdrop-blur-md">
+              {state.error}
             </div>
           )}
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email Address</label>
-              <input
-                name="email"
-                type="email"
-                required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                placeholder="admin@example.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                name="password"
-                type="password"
-                required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                placeholder="••••••••"
-              />
-            </div>
+
+          <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              className="w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium text-slate-700">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              className="w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
           </div>
 
           <button
             type="submit"
-            className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            disabled={isPending}
+            className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Masuk Sekarang
+            {isPending ? 'Memproses...' : 'Masuk'}
           </button>
         </form>
       </div>
     </div>
-  )
+  );
 }

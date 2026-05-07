@@ -1,14 +1,28 @@
-import { SettingSection } from "../components/SettingsSection"
+import { createClient } from "../../../../utils/supabase/client";
+import { SettingSection } from "../components/SettingsSection";
+import { Settings2 } from "lucide-react";
 
-export default function SettingsPage() {
+export const revalidate = 0;
+
+export default async function SettingsPage() {
+  const supabase = await createClient();
+  
+  const { data: settings } = await supabase
+    .from("site_settings")
+    .select("*")
+    .eq("id", 1)
+    .single();
+
+  const initialData = settings || {
+    site_name: "",
+    contact_email: "",
+    whatsapp_number: "",
+    address: ""
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Pengaturan Website</h1>
-        <p className="text-slate-500 text-sm">Sesuaikan informasi identitas dan kontak website Anda.</p>
-      </div>
-
-      <SettingSection />
+    <div className="space-y-8 max-w-5xl">
+      <SettingSection initialData={initialData} />
     </div>
-  )
+  );
 }

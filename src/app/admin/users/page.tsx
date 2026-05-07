@@ -1,19 +1,22 @@
-import { UserSection } from "../components/UserSection"
+import { createClient } from "../../../../utils/supabase/client";
+import { UserSection } from "../components/UserSection";
+import { ShieldCheck } from "lucide-react";
 
-export default function UsersPage() {
+export const revalidate = 0;
+
+export default async function UsersPage() {
+  const supabase = await createClient();
+  
+  // Fetch data di server
+  const { data: admins } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("role", "admin")
+    .order("created_at", { ascending: false });
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">Manajemen Admin</h1>
-          <p className="text-slate-500 text-sm">Kelola siapa saja yang bisa mengakses dashboard ini.</p>
-        </div>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all active:scale-95 text-sm">
-          + Tambah Admin
-        </button>
-      </div>
-
-      <UserSection />
+    <div className="space-y-8 max-w-7xl">
+      <UserSection initialAdmins={admins || []} />
     </div>
-  )
+  );
 }
