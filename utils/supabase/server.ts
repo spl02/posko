@@ -1,3 +1,4 @@
+import 'server-only'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -12,13 +13,14 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll()
         },
+
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
+            cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, options)
-            )
+            })
           } catch {
-            // Ini bisa diabaikan jika dipanggil dari Server Component
+            // ignore jika dipanggil di Server Component
           }
         },
       },
