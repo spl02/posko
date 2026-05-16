@@ -1,210 +1,213 @@
-import React from "react";
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { createClient } from "../../../utils/supabase/client";
+
+const supabase = createClient();
 
 export default function Footer() {
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("*")
+      .single();
+
+    setSettings(data);
+  };
+
   return (
-    <footer className="bg-black text-white pt-16 pb-6">
+    <footer className="bg-black text-white pt-20 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
-          <div className="flex flex-col gap-4">
-            <h3 className="text-2xl font-bold tracking-wider mb-2">PosKo</h3>
-            <p className="font-medium text-lg">Berlangganan</p>
-            <p className="text-sm text-gray-300">
-              Dapatkan diskon 10% untuk pesanan pertama Anda
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              {settings?.logo_url && (
+                <img
+                  src={settings.logo_url}
+                  alt={settings.site_name}
+                  className="w-12 h-12 object-contain rounded-xl bg-white p-1"
+                />
+              )}
+
+              <h2 className="text-3xl font-black tracking-tight">
+                {settings?.site_name || "PosKo"}
+              </h2>
+            </div>
+
+            <p className="text-gray-400 leading-relaxed text-sm">
+              {settings?.site_description ||
+                "Toko komputer dan sparepart gaming terpercaya dengan produk original dan harga terbaik."}
             </p>
-            <div className="relative mt-2">
-              <input
-                type="email"
-                placeholder="Masukkan email Anda"
-                className="bg-transparent border border-white rounded-sm py-2.5 pl-4 pr-12 w-full text-sm focus:outline-none focus:border-[#DB4444] transition"
-              />
-              <button className="absolute right-3 top-2.5 text-white hover:text-[#DB4444] transition">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+
+            <div className="flex flex-wrap gap-3 mt-8">
+              {settings?.instagram_url && (
+                <a
+                  href={settings.instagram_url}
+                  target="_blank"
+                  className="w-11 h-11 rounded-xl bg-white/10 hover:bg-[#DB4444] transition flex items-center justify-center"
                 >
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-              </button>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <rect x="2" y="2" width="20" height="20" rx="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                  </svg>
+                </a>
+              )}
+
+              {settings?.facebook_url && (
+                <a
+                  href={settings.facebook_url}
+                  target="_blank"
+                  className="w-11 h-11 rounded-xl bg-white/10 hover:bg-[#DB4444] transition flex items-center justify-center"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                  </svg>
+                </a>
+              )}
+
+              {settings?.tiktok_url && (
+                <a
+                  href={settings.tiktok_url}
+                  target="_blank"
+                  className="w-11 h-11 rounded-xl bg-white/10 hover:bg-[#DB4444] transition flex items-center justify-center"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M19 7.5a5.5 5.5 0 0 1-4-1.7V15a5 5 0 1 1-5-5h.5v3A2 2 0 1 0 12 15V2h3a5.5 5.5 0 0 0 4 4v1.5z" />
+                  </svg>
+                </a>
+              )}
             </div>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold mb-2">Dukungan</h3>
-            <p className="text-sm text-gray-300 leading-relaxed">
-              Jl. Contoh No. 123, Jakarta Selatan, Indonesia.
-            </p>
-            <p className="text-sm text-gray-300 hover:text-white transition cursor-pointer">
-              posko.official@gmail.com
-            </p>
-            <p className="text-sm text-gray-300 hover:text-white transition cursor-pointer">
-              +62 812-3456-7890
-            </p>
+          <div>
+            <h3 className="text-lg font-bold mb-6">Navigasi</h3>
+
+            <div className="flex flex-col gap-4 text-sm text-gray-400">
+              <Link href="/" className="hover:text-white transition">
+                Beranda
+              </Link>
+
+              <Link href="/catalog" className="hover:text-white transition">
+                Katalog
+              </Link>
+
+              <Link href="/cart" className="hover:text-white transition">
+                Keranjang
+              </Link>
+
+              <Link href="/wishlist" className="hover:text-white transition">
+                Wishlist
+              </Link>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold mb-2">Akun</h3>
-            <a
-              href="#"
-              className="text-sm text-gray-300 hover:text-white transition"
-            >
-              Akun Saya
-            </a>
-            <a
-              href="#"
-              className="text-sm text-gray-300 hover:text-white transition"
-            >
-              Masuk / Daftar
-            </a>
-            <a
-              href="#"
-              className="text-sm text-gray-300 hover:text-white transition"
-            >
-              Keranjang
-            </a>
-            <a
-              href="#"
-              className="text-sm text-gray-300 hover:text-white transition"
-            >
-              Wishlist
-            </a>
-            <a
-              href="#"
-              className="text-sm text-gray-300 hover:text-white transition"
-            >
-              Belanja
-            </a>
+          <div>
+            <h3 className="text-lg font-bold mb-6">Marketplace</h3>
+
+            <div className="flex flex-col gap-4 text-sm text-gray-400">
+              {settings?.shopee_url && (
+                <a
+                  href={settings.shopee_url}
+                  target="_blank"
+                  className="hover:text-white transition"
+                >
+                  Shopee Official Store
+                </a>
+              )}
+
+              {settings?.tokopedia_url && (
+                <a
+                  href={settings.tokopedia_url}
+                  target="_blank"
+                  className="hover:text-white transition"
+                >
+                  Tokopedia Official Store
+                </a>
+              )}
+
+              {settings?.whatsapp_number && (
+                <a
+                  href={`https://wa.me/${settings.whatsapp_number}`}
+                  target="_blank"
+                  className="hover:text-white transition"
+                >
+                  WhatsApp Admin
+                </a>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold mb-2">Tautan Cepat</h3>
-            <a
-              href="#"
-              className="text-sm text-gray-300 hover:text-white transition"
-            >
-              Kebijakan Privasi
-            </a>
-            <a
-              href="#"
-              className="text-sm text-gray-300 hover:text-white transition"
-            >
-              Syarat Penggunaan
-            </a>
-            <a
-              href="#"
-              className="text-sm text-gray-300 hover:text-white transition"
-            >
-              FAQ
-            </a>
-            <a
-              href="#"
-              className="text-sm text-gray-300 hover:text-white transition"
-            >
-              Kontak
-            </a>
-          </div>
+          <div>
+            <h3 className="text-lg font-bold mb-6">Kontak</h3>
 
-          <div className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold mb-2">Unduh Aplikasi</h3>
-            <p className="text-xs text-gray-400 font-medium">
-              Hemat Rp 50.000 untuk pengguna baru aplikasi
-            </p>
-            <div className="flex gap-2 items-center">
-              <div className="w-20 h-20 bg-white p-1 rounded-sm">
-                <img
-                  src="https://placehold.co/100x100/fff/000?text=QR"
-                  alt="QR Code"
-                  className="w-full h-full object-cover"
+            <div className="space-y-4 text-sm text-gray-400">
+              <p>{settings?.address || "Alamat belum diatur"}</p>
+
+              <p>{settings?.contact_email || "Email belum diatur"}</p>
+
+              <p>
+                {settings?.whatsapp_number ||
+                  "Nomor WhatsApp belum diatur"}
+              </p>
+            </div>
+
+            {settings?.google_maps_embed && (
+              <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
+                <iframe
+                  src={settings.google_maps_embed}
+                  width="100%"
+                  height="180"
+                  loading="lazy"
+                  className="w-full"
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <img
-                  src="https://placehold.co/120x40/000/fff?text=Google+Play"
-                  alt="Google Play"
-                  className="h-10 cursor-pointer border border-gray-700 rounded-sm hover:opacity-80 transition"
-                />
-                <img
-                  src="https://placehold.co/120x40/000/fff?text=App+Store"
-                  alt="App Store"
-                  className="h-10 cursor-pointer border border-gray-700 rounded-sm hover:opacity-80 transition"
-                />
-              </div>
-            </div>
-            <div className="flex gap-6 mt-4">
-              <a
-                href="#"
-                className="text-gray-300 hover:text-[#DB4444] transition"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                </svg>
-              </a>
-              <a
-                href="#"
-                className="text-gray-300 hover:text-[#DB4444] transition"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                </svg>
-              </a>
-              <a
-                href="#"
-                className="text-gray-300 hover:text-[#DB4444] transition"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                </svg>
-              </a>
-              <a
-                href="#"
-                className="text-gray-300 hover:text-[#DB4444] transition"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                  <rect x="2" y="9" width="4" height="12" />
-                  <circle cx="4" cy="4" r="2" />
-                </svg>
-              </a>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-6 text-center text-gray-500 text-sm">
-          <p>&copy; Copyright PosKo 2026. All right reserved</p>
+        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-gray-500 text-center md:text-left">
+            © {new Date().getFullYear()}{" "}
+            {settings?.site_name || "PosKo"}.
+            All rights reserved.
+          </p>
+
+          <div className="flex items-center gap-6 text-sm text-gray-500">
+            <Link href="/privacy-policy" className="hover:text-white transition">
+              Privacy Policy
+            </Link>
+
+            <Link href="/terms" className="hover:text-white transition">
+              Terms & Conditions
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

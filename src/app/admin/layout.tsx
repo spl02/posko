@@ -37,6 +37,12 @@ const menuItems = [
     icon: Settings,
     href: '/admin/settings',
   },
+  {
+    id: 'orders',
+    title: 'Orderan',
+    icon: Settings,
+    href: '/admin/orders',
+  },
 ]
 
 export default function AdminLayout({
