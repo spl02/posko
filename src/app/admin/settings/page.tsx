@@ -37,7 +37,7 @@ export interface SiteSettings {
 
 export default async function SiteSettingsPage() {
   const supabase = await createClient();
-  
+
   const { data: settings } = await supabase
     .from("site_settings")
     .select("*")

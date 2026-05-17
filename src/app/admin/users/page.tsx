@@ -6,7 +6,6 @@ export const revalidate = 0;
 
 export default async function UsersPage() {
   const supabase = await createClient();
-  
   const { data: admins } = await supabase
     .from("profiles")
     .select("*")
