@@ -1,9 +1,7 @@
 import React from "react";
-import { createClient } from "../../../utils/supabase/client";
+import { supabase } from "../../../utils/supabase/client";
 
 export default async function Promote() {
-  const supabase = createClient();
-
   const { data: settings } = await supabase
     .from("site_settings")
     .select("site_description")

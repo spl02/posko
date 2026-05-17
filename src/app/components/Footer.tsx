@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "../../../utils/supabase/client";
+import { supabase } from "../../../utils/supabase/client";
 
 export default function Footer() {
-  const supabase = createClient();
-
   const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {

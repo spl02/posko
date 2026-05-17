@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "../../../utils/supabase/client";
+import { supabase } from "../../../utils/supabase/client";
 
 const IconHeart = () => (
   <svg
@@ -35,8 +35,6 @@ const IconUser = () => (
 );
 
 export default async function Header() {
-  const supabase = createClient();
-
   const { data: settings } = await supabase
     .from("site_settings")
     .select("site_name, logo_url")

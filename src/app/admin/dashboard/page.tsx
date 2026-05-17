@@ -1,4 +1,4 @@
-import { createClient } from "../../../../utils/supabase/server";
+import { supabase } from "../../../../utils/supabase/client";
 import {
   TrendingUp,
   DollarSign,
@@ -11,8 +11,6 @@ import DashboardChart from "../components/DashboardSection";
 export const revalidate = 0;
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-
   const [
     { data: products, count: totalProducts },
     { count: totalAdmins },

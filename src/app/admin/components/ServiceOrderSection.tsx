@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "../../../../utils/supabase/client";
+import { supabase } from "../../../../utils/supabase/client";
 import { Plus, X, Settings2 } from "lucide-react";
 
 // Interfaces
@@ -33,7 +33,6 @@ export const ServiceOrderSection = ({
   initialOrders: ServiceOrder[];
   statuses: ServiceStatus[];
 }) => {
-  const supabase = createClient();
   const [orders, setOrders] = useState<ServiceOrder[]>(initialOrders || []);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

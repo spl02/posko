@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "../../../../utils/supabase/client";
+import { supabase } from "../../../../utils/supabase/client";
 import { Trash2, UserPlus, X, KeySquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -23,7 +23,6 @@ export const UserSection = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [email, setEmail] = useState("");
 
-  const supabase = createClient();
   const router = useRouter();
 
   // FUNGSI HAPUS ADMIN

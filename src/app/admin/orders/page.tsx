@@ -1,12 +1,9 @@
-import { createClient } from "../../../../utils/supabase/client";
+import { supabase } from "../../../../utils/supabase/client";
 import { ServiceOrderSection } from "../components/ServiceOrderSection";
 
 export const revalidate = 0;
 
 export default async function ServiceOrdersPage() {
-  const supabase = createClient();
-
-  // 1. FETCH ORDERS + JOIN STATUS
   const { data: orders } = await supabase
     .from("service_orders")
     .select(`

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { createClient } from "../../../../utils/supabase/client";
+import { supabase } from "../../../../utils/supabase/client";
 import {
   Plus,
   X,
@@ -25,7 +25,6 @@ export const ProductSection = ({
 }: {
   initialProducts: Product[];
 }) => {
-  const supabase = createClient();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

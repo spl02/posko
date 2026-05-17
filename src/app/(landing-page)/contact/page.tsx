@@ -7,9 +7,7 @@ import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import Promote from "@/app/components/Promote";
 
-import { createClient } from "../../../../utils/supabase/client";
-
-const supabase = createClient();
+import { supabase } from "../../../../utils/supabase/client";
 
 interface SiteSettings {
   site_name?: string;

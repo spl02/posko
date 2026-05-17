@@ -8,7 +8,7 @@ import Promote from "../components/Promote";
 import BackOnTop from "../components/BackOnTop";
 import { IconEye, IconHeart, IconSearch, IconStar } from "../components/Icon";
 
-import { createClient } from "../../../utils/supabase/client";
+import { supabase } from "../../../utils/supabase/client";
 
 interface Product {
   id: string;
@@ -25,8 +25,6 @@ interface Category {
   name: string;
   slug: string;
 }
-
-const supabase = createClient();
 
 const FormatRupiah = ({ value }: { value: number }) => {
   return new Intl.NumberFormat("id-ID", {

@@ -5,7 +5,7 @@ import BackOnTop from "@/app/components/BackOnTop";
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import Promote from "@/app/components/Promote";
-import { createClient } from "../../../../utils/supabase/client";
+import { supabase } from "../../../../utils/supabase/client";
 
 interface AboutSettings {
   id: string;
@@ -21,8 +21,6 @@ interface AboutSettings {
 }
 
 export default function AboutPage() {
-  const supabase = createClient();
-
   const [about, setAbout] = useState<AboutSettings | null>(null);
   const [loading, setLoading] = useState(true);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "../../../../utils/supabase/client";
+import { supabase } from "../../../../utils/supabase/client";
 
 import {
   Save,
@@ -22,7 +22,6 @@ export const SiteSettingsSection = ({
 }: {
   initialData: SiteSettings;
 }) => {
-  const supabase = createClient();
   const router = useRouter();
 
   const [formData, setFormData] = useState<SiteSettings>(initialData);

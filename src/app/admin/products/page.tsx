@@ -1,13 +1,9 @@
-import { createClient } from "../../../../utils/supabase/client";
+import { supabase } from "../../../../utils/supabase/client";
 import { ProductSection } from "../components/ProductSection";
-import { PackageOpen } from "lucide-react";
 
 export const revalidate = 0;
 
 export default async function ProductsPage() {
-  const supabase = await createClient();
-
-  // Fetch data awal di server
   const { data: products } = await supabase
     .from("products")
     .select("*")

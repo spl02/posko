@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Menu, Search, Bell } from 'lucide-react'
-import { createClient } from '../../../../utils/supabase/client'
+import { supabase } from '../../../../utils/supabase/client'
 
 interface HeaderProps {
   toggleSidebar: () => void
@@ -10,7 +10,6 @@ interface HeaderProps {
 
 export const Header = ({ toggleSidebar }: HeaderProps) => {
   const [email, setEmail] = useState('')
-  const supabase = createClient()
 
   useEffect(() => {
     const getUser = async () => {

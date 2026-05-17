@@ -12,9 +12,7 @@ import {
 } from "@/app/components/Icon";
 import Promote from "@/app/components/Promote";
 
-import { createClient } from "../../../../utils/supabase/client";
-
-const supabase = createClient();
+import { supabase } from "../../../../utils/supabase/client";
 
 interface Product {
   id: string;
