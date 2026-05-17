@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabase } from "../../../utils/supabase/client";
+import { useState, useEffect } from "react";
 
 const IconHeart = () => (
   <svg
@@ -34,15 +35,24 @@ const IconUser = () => (
   </svg>
 );
 
-export default async function Header() {
-  const { data: settings } = await supabase
-    .from("site_settings")
-    .select("site_name, logo_url")
-    .limit(1)
-    .maybeSingle();
+export default function Header() {
+  const [siteName, setSiteName] = useState("PosKo");
+  const [logoUrl, setLogoUrl] = useState("/icon.png");
 
-  const siteName = settings?.site_name || "PosKo";
-  const logoUrl = settings?.logo_url || "/icon.png";
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("site_name, logo_url")
+        .limit(1)
+        .maybeSingle();
+
+      if (data?.site_name) setSiteName(data.site_name);
+      if (data?.logo_url) setLogoUrl(data.logo_url);
+    };
+
+    fetchSettings();
+  }, []);
 
   return (
     <header className="border-b border-gray-200 sticky top-0 bg-white z-50">
@@ -69,33 +79,10 @@ export default async function Header() {
 
         {/* NAVIGATION */}
         <nav className="hidden md:flex gap-8 font-medium">
-          <Link
-            href="/"
-            className="hover:text-[#DB4444] transition underline-offset-4"
-          >
-            Beranda
-          </Link>
-
-          <Link
-            href="/about"
-            className="hover:text-[#DB4444] transition underline-offset-4"
-          >
-            Tentang
-          </Link>
-
-          <Link
-            href="/catalog"
-            className="hover:text-[#DB4444] transition underline-offset-4"
-          >
-            Katalog
-          </Link>
-
-          <Link
-            href="/contact"
-            className="hover:text-[#DB4444] transition underline-offset-4"
-          >
-            Kontak
-          </Link>
+          <Link href="/" className="hover:text-[#DB4444] transition underline-offset-4">Beranda</Link>
+          <Link href="/about" className="hover:text-[#DB4444] transition underline-offset-4">Tentang</Link>
+          <Link href="/catalog" className="hover:text-[#DB4444] transition underline-offset-4">Katalog</Link>
+          <Link href="/contact" className="hover:text-[#DB4444] transition underline-offset-4">Kontak</Link>
         </nav>
       </div>
     </header>
