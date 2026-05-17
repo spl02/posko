@@ -1,5 +1,4 @@
-"use client"
-import { supabase } from "../../../../utils/supabase/client";
+import { createClient } from "../../../../utils/supabase/server";
 import { SiteSettingsSection } from "../components/SiteSettingSection";
 
 export const revalidate = 0;
@@ -37,6 +36,8 @@ export interface SiteSettings {
 }
 
 export default async function SiteSettingsPage() {
+  const supabase = await createClient();
+  
   const { data: settings } = await supabase
     .from("site_settings")
     .select("*")

@@ -1,10 +1,10 @@
-"use client";
-import { supabase } from "../../../../utils/supabase/client";
+import { createClient } from "../../../../utils/supabase/server";
 import { ProductSection } from "../components/ProductSection";
 
 export const revalidate = 0;
 
 export default async function ProductsPage() {
+  const supabase = await createClient();
   const { data: products } = await supabase
     .from("products")
     .select("*")

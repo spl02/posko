@@ -1,10 +1,10 @@
-"use client"
-import { supabase } from "../../../../utils/supabase/client";
+import { createClient } from "../../../../utils/supabase/server";
 import { ServiceOrderSection } from "../components/ServiceOrderSection";
 
 export const revalidate = 0;
 
 export default async function ServiceOrdersPage() {
+  const supabase = await createClient();
   const { data: orders } = await supabase
     .from("service_orders")
     .select(`
