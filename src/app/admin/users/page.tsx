@@ -1,3 +1,4 @@
+"use client"
 import { supabase } from "../../../../utils/supabase/client";
 import { UserSection } from "../components/UserSection";
 import { ShieldCheck } from "lucide-react";

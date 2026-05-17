@@ -1,3 +1,4 @@
+"use client"
 import { supabase } from "../../../../utils/supabase/client";
 import { ServiceOrderSection } from "../components/ServiceOrderSection";
 
