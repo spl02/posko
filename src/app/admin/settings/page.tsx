@@ -1,53 +1,91 @@
 import { createClient } from "../../../../utils/supabase/client";
-import { AboutSettingSection } from "../components/AboutSettingSection";
+import { SiteSettingsSection } from "../components/SiteSettingSection";
 
 export const revalidate = 0;
 
-export interface AboutSettings {
-  id?: string;
-  company_name: string;
-  about_description: string;
-  vision: string;
-  mission_1: string;
-  mission_2: string;
-  mission_3: string;
-  mission_4: string;
-  mission_5: string;
-  commitment_text: string;
+export interface SiteSettings {
+  id?: number;
+
+  site_name: string;
+  contact_email: string;
+  whatsapp_number: string;
+  address: string;
+
+  site_description: string;
+
+  hero_title: string;
+  hero_subtitle: string;
+  hero_image: string;
+
+  cta_title: string;
+  cta_description: string;
+
+  google_maps_embed: string;
+
+  instagram_url: string;
+  facebook_url: string;
+
+  logo_url: string;
+  banner_url: string;
+
+  contact_title: string;
+  contact_description: string;
+
+  operational_hours: string;
+  whatsapp_message: string;
 }
 
-export default async function AboutSettingsPage() {
+export default async function SiteSettingsPage() {
   const supabase = createClient();
 
-  // SAFE FETCH (mengambil 1 baris pertama karena ID menggunakan UUID)
   const { data: settings } = await supabase
-    .from("about_settings")
+    .from("site_settings")
     .select("*")
     .limit(1)
     .maybeSingle();
 
-  // SAFE DEFAULT (tidak overwrite undefined)
-  const initialData: AboutSettings = {
-    id: settings?.id, // Kirim ID untuk keperluan Update
-    company_name: settings?.company_name ?? "",
-    about_description: settings?.about_description ?? "",
-    vision: settings?.vision ?? "",
-    mission_1: settings?.mission_1 ?? "",
-    mission_2: settings?.mission_2 ?? "",
-    mission_3: settings?.mission_3 ?? "",
-    mission_4: settings?.mission_4 ?? "",
-    mission_5: settings?.mission_5 ?? "",
-    commitment_text: settings?.commitment_text ?? "",
+  const initialData: SiteSettings = {
+    id: settings?.id,
+
+    site_name: settings?.site_name ?? "",
+    contact_email: settings?.contact_email ?? "",
+    whatsapp_number: settings?.whatsapp_number ?? "",
+    address: settings?.address ?? "",
+
+    site_description: settings?.site_description ?? "",
+
+    hero_title: settings?.hero_title ?? "",
+    hero_subtitle: settings?.hero_subtitle ?? "",
+    hero_image: settings?.hero_image ?? "",
+
+    cta_title: settings?.cta_title ?? "",
+    cta_description: settings?.cta_description ?? "",
+
+    google_maps_embed: settings?.google_maps_embed ?? "",
+
+    instagram_url: settings?.instagram_url ?? "",
+    facebook_url: settings?.facebook_url ?? "",
+
+    logo_url: settings?.logo_url ?? "",
+    banner_url: settings?.banner_url ?? "",
+
+    contact_title: settings?.contact_title ?? "",
+    contact_description: settings?.contact_description ?? "",
+
+    operational_hours: settings?.operational_hours ?? "",
+    whatsapp_message: settings?.whatsapp_message ?? "",
   };
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto px-4 py-10">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-5 h-10 bg-indigo-600 rounded-sm"></div>
-        <h1 className="text-2xl font-bold">Pengaturan Tentang Kami (About)</h1>
+        <h1 className="text-2xl font-bold">
+          Pengaturan Website
+        </h1>
       </div>
 
-      <AboutSettingSection initialData={initialData} />
+      <SiteSettingsSection initialData={initialData} />
     </div>
   );
 }

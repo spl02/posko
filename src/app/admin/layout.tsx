@@ -7,6 +7,7 @@ import {
   Users,
   Package,
   Settings,
+  ListOrdered,
 } from 'lucide-react'
 
 import { Sidebar } from './components/Sidebar'
@@ -40,7 +41,7 @@ const menuItems = [
   {
     id: 'orders',
     title: 'Orderan',
-    icon: Settings,
+    icon: ListOrdered,
     href: '/admin/orders',
   },
 ]
