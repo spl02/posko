@@ -8,6 +8,8 @@ import {
   UploadCloud,
   Package,
   Image as ImageIcon,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -28,6 +30,9 @@ export const ProductSection = ({
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // Form States
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
@@ -37,7 +42,8 @@ export const ProductSection = ({
 
   useEffect(() => {
     return () => {
-      if (imagePreview) {
+      // Cleanup object URL untuk mencegah memory leak
+      if (imagePreview && !imagePreview.startsWith("http")) {
         URL.revokeObjectURL(imagePreview);
       }
     };
@@ -48,8 +54,9 @@ export const ProductSection = ({
     setPrice("");
     setStock("");
     setImageFile(null);
+    setEditingProduct(null);
 
-    if (imagePreview) {
+    if (imagePreview && !imagePreview.startsWith("http")) {
       URL.revokeObjectURL(imagePreview);
     }
 
@@ -72,8 +79,8 @@ export const ProductSection = ({
       return;
     }
 
-    // HAPUS PREVIEW LAMA
-    if (imagePreview) {
+    // HAPUS PREVIEW LAMA JIKA ADA
+    if (imagePreview && !imagePreview.startsWith("http")) {
       URL.revokeObjectURL(imagePreview);
     }
 
@@ -81,8 +88,8 @@ export const ProductSection = ({
     setImagePreview(URL.createObjectURL(file));
   };
 
-  // CREATE PRODUCT
-  const handleCreateProduct = async () => {
+  // CREATE & UPDATE PRODUCT
+  const handleSubmit = async () => {
     // VALIDASI INPUT
     if (!name || !price || !stock) {
       alert("Nama, harga, dan stok wajib diisi!");
@@ -101,13 +108,13 @@ export const ProductSection = ({
 
     setIsSubmitting(true);
 
-    let uploadedImageUrl: string | null = null;
+    // Default ke image lama jika sedang edit dan tidak upload image baru
+    let uploadedImageUrl: string | null = editingProduct?.image_url || null;
 
     try {
-      // UPLOAD GAMBAR
+      // UPLOAD GAMBAR BARU JIKA ADA
       if (imageFile) {
         const fileExt = imageFile.name.split(".").pop();
-
         const fileName = `${Date.now()}-${Math.random()
           .toString(36)
           .substring(2)}.${fileExt}`;
@@ -131,25 +138,47 @@ export const ProductSection = ({
         uploadedImageUrl = publicUrlData.publicUrl;
       }
 
-      // INSERT DATABASE
-      const { data: newProduct, error: insertError } = await supabase
-        .from("products")
-        .insert({
-          name,
-          price: Number(price),
-          stock: Number(stock),
-          image_url: uploadedImageUrl,
-        })
-        .select()
-        .single();
+      if (editingProduct) {
+        // --- PROSES UPDATE ---
+        const { data: updatedProduct, error: updateError } = await supabase
+          .from("products")
+          .update({
+            name,
+            price: Number(price),
+            stock: Number(stock),
+            image_url: uploadedImageUrl,
+          })
+          .eq("id", editingProduct.id)
+          .select()
+          .single();
 
-      if (insertError) {
-        throw insertError;
-      }
+        if (updateError) throw updateError;
 
-      // UPDATE UI
-      if (newProduct) {
-        setProducts((prev) => [newProduct, ...prev]);
+        // UPDATE UI
+        if (updatedProduct) {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+          );
+        }
+      } else {
+        // --- PROSES CREATE ---
+        const { data: newProduct, error: insertError } = await supabase
+          .from("products")
+          .insert({
+            name,
+            price: Number(price),
+            stock: Number(stock),
+            image_url: uploadedImageUrl,
+          })
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+
+        // UPDATE UI
+        if (newProduct) {
+          setProducts((prev) => [newProduct, ...prev]);
+        }
       }
 
       // RESET
@@ -159,6 +188,46 @@ export const ProductSection = ({
       alert(`Gagal menyimpan produk: ${error.message}`);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // PREPARE EDIT
+  const handleEditClick = (product: Product) => {
+    setEditingProduct(product);
+    setName(product.name);
+    setPrice(product.price.toString());
+    setStock(product.stock.toString());
+    setImagePreview(product.image_url); // Tampilkan gambar lama sebagai preview
+    setShowForm(true);
+  };
+
+  // DELETE PRODUCT
+  const handleDelete = async (product: Product) => {
+    if (!window.confirm(`Apakah Anda yakin ingin menghapus "${product.name}"?`)) {
+      return;
+    }
+
+    try {
+      // Hapus gambar dari storage jika ada
+      if (product.image_url) {
+        const fileName = product.image_url.split("/").pop();
+        if (fileName) {
+          await supabase.storage.from("product-images").remove([fileName]);
+        }
+      }
+
+      // Hapus data dari database
+      const { error: deleteError } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", product.id);
+
+      if (deleteError) throw deleteError;
+
+      // Update UI state
+      setProducts((prev) => prev.filter((p) => p.id !== product.id));
+    } catch (error: any) {
+      alert(`Gagal menghapus produk: ${error.message}`);
     }
   };
 
@@ -223,7 +292,7 @@ export const ProductSection = ({
                 )}
 
                 {/* STOCK BADGE */}
-                <div className="absolute top-4 right-4 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-md shadow-sm border border-white/50 text-xs font-bold text-slate-700">
+                <div className="absolute top-4 left-4 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-md shadow-sm border border-white/50 text-xs font-bold text-slate-700">
                   Sisa:{" "}
                   <span
                     className={
@@ -232,6 +301,24 @@ export const ProductSection = ({
                   >
                     {product.stock}
                   </span>
+                </div>
+
+                {/* ACTION BUTTONS */}
+                <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <button
+                    onClick={() => handleEditClick(product)}
+                    className="p-2 bg-white/90 backdrop-blur-md hover:bg-indigo-50 text-indigo-600 rounded-xl shadow-sm border border-white/50 transition-colors"
+                    title="Edit Produk"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product)}
+                    className="p-2 bg-white/90 backdrop-blur-md hover:bg-red-50 text-red-500 rounded-xl shadow-sm border border-white/50 transition-colors"
+                    title="Hapus Produk"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
 
@@ -272,7 +359,7 @@ export const ProductSection = ({
             </button>
 
             <h2 className="text-2xl font-bold text-slate-900 mb-6">
-              Informasi Produk
+              {editingProduct ? "Edit Produk" : "Informasi Produk"}
             </h2>
 
             <div className="space-y-5">
@@ -296,7 +383,6 @@ export const ProductSection = ({
                   ) : (
                     <>
                       <UploadCloud size={32} className="text-slate-400 mb-2" />
-
                       <span className="text-sm font-medium text-slate-500">
                         Klik untuk unggah gambar
                       </span>
@@ -362,11 +448,15 @@ export const ProductSection = ({
               {/* ACTIONS */}
               <div className="flex gap-3 pt-4">
                 <button
-                  onClick={handleCreateProduct}
+                  onClick={handleSubmit}
                   disabled={isSubmitting}
                   className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all active:scale-95 disabled:opacity-70 flex justify-center items-center"
                 >
-                  {isSubmitting ? "Menyimpan..." : "Simpan Produk"}
+                  {isSubmitting
+                    ? "Menyimpan..."
+                    : editingProduct
+                    ? "Simpan Perubahan"
+                    : "Simpan Produk"}
                 </button>
 
                 <button

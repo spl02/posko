@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "../../../../utils/supabase/client";
-import { Plus, X, Settings2 } from "lucide-react";
+import { Plus, X, Settings2, Edit2, Trash2 } from "lucide-react";
 
 // Interfaces
 interface ServiceStatus {
@@ -36,6 +36,7 @@ export const ServiceOrderSection = ({
   const [orders, setOrders] = useState<ServiceOrder[]>(initialOrders || []);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<ServiceOrder | null>(null);
 
   // Form States
   const [customerName, setCustomerName] = useState("");
@@ -52,9 +53,11 @@ export const ServiceOrderSection = ({
     setProblem("");
     setTechnicianName("");
     setStatusId("");
+    setEditingOrder(null);
   };
 
-  const handleCreateOrder = async () => {
+  // CREATE & UPDATE ORDER
+  const handleSubmit = async () => {
     // VALIDASI INPUT DASAR
     if (!customerName || !deviceName || !problem || !statusId) {
       alert("Nama Pelanggan, Perangkat, Keluhan, dan Status wajib diisi!");
@@ -64,40 +67,71 @@ export const ServiceOrderSection = ({
     setIsSubmitting(true);
 
     try {
-      // Auto-generate Queue & Receipt Number sederhana
-      const queueNumber = `Q-${Math.floor(1000 + Math.random() * 9000)}`;
-      const receiptNumber = `INV-${Date.now()}`;
+      if (editingOrder) {
+        // --- PROSES UPDATE ---
+        const { data: updatedOrder, error: updateError } = await supabase
+          .from("service_orders")
+          .update({
+            customer_name: customerName,
+            customer_phone: customerPhone,
+            device_name: deviceName,
+            problem: problem,
+            technician_name: technicianName,
+            status_id: statusId,
+          })
+          .eq("id", editingOrder.id)
+          .select(`
+            *,
+            service_statuses (
+              id,
+              name,
+              color
+            )
+          `)
+          .single();
 
-      // INSERT DATABASE & JOIN STATUS (Agar UI langsung update dengan warna/nama status)
-      const { data: newOrder, error: insertError } = await supabase
-        .from("service_orders")
-        .insert({
-          queue_number: queueNumber,
-          receipt_number: receiptNumber,
-          customer_name: customerName,
-          customer_phone: customerPhone,
-          device_name: deviceName,
-          problem: problem,
-          technician_name: technicianName,
-          status_id: statusId,
-        })
-        .select(`
-          *,
-          service_statuses (
-            id,
-            name,
-            color
-          )
-        `)
-        .single();
+        if (updateError) throw updateError;
 
-      if (insertError) {
-        throw insertError;
-      }
+        // UPDATE UI
+        if (updatedOrder) {
+          setOrders((prev) =>
+            prev.map((o) => (o.id === updatedOrder.id ? (updatedOrder as ServiceOrder) : o))
+          );
+        }
+      } else {
+        // --- PROSES CREATE ---
+        // Auto-generate Queue & Receipt Number sederhana
+        const queueNumber = `Q-${Math.floor(1000 + Math.random() * 9000)}`;
+        const receiptNumber = `INV-${Date.now()}`;
 
-      // UPDATE UI (Tambahkan order baru ke urutan paling atas)
-      if (newOrder) {
-        setOrders((prev) => [newOrder as ServiceOrder, ...prev]);
+        const { data: newOrder, error: insertError } = await supabase
+          .from("service_orders")
+          .insert({
+            queue_number: queueNumber,
+            receipt_number: receiptNumber,
+            customer_name: customerName,
+            customer_phone: customerPhone,
+            device_name: deviceName,
+            problem: problem,
+            technician_name: technicianName,
+            status_id: statusId,
+          })
+          .select(`
+            *,
+            service_statuses (
+              id,
+              name,
+              color
+            )
+          `)
+          .single();
+
+        if (insertError) throw insertError;
+
+        // UPDATE UI (Tambahkan order baru ke urutan paling atas)
+        if (newOrder) {
+          setOrders((prev) => [newOrder as ServiceOrder, ...prev]);
+        }
       }
 
       // RESET
@@ -107,6 +141,43 @@ export const ServiceOrderSection = ({
       alert(`Gagal menyimpan order: ${error.message}`);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // PREPARE EDIT
+  const handleEditClick = (order: ServiceOrder) => {
+    setEditingOrder(order);
+    setCustomerName(order.customer_name);
+    setCustomerPhone(order.customer_phone || "");
+    setDeviceName(order.device_name);
+    setProblem(order.problem);
+    setTechnicianName(order.technician_name || "");
+    setStatusId(order.status_id);
+    setShowForm(true);
+  };
+
+  // DELETE ORDER
+  const handleDelete = async (order: ServiceOrder) => {
+    if (
+      !window.confirm(
+        `Apakah Anda yakin ingin menghapus order ${order.queue_number} atas nama ${order.customer_name}?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("service_orders")
+        .delete()
+        .eq("id", order.id);
+
+      if (deleteError) throw deleteError;
+
+      // Update UI state
+      setOrders((prev) => prev.filter((o) => o.id !== order.id));
+    } catch (error: any) {
+      alert(`Gagal menghapus order: ${error.message}`);
     }
   };
 
@@ -152,7 +223,7 @@ export const ServiceOrderSection = ({
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-2xl overflow-hidden">
+      <div className="bg-white border rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-[#F5F5F5] text-left">
@@ -164,44 +235,64 @@ export const ServiceOrderSection = ({
                 <th className="p-4">Technician</th>
                 <th className="p-4">Status</th>
                 <th className="p-4">Created</th>
+                <th className="p-4 text-center">Aksi</th>
               </tr>
             </thead>
 
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-500">
+                  <td colSpan={8} className="p-8 text-center text-gray-500">
                     Belum ada service order.
                   </td>
                 </tr>
               ) : (
                 orders.map((order) => (
-                  <tr key={order.id} className="border-t hover:bg-gray-50">
+                  <tr key={order.id} className="border-t hover:bg-gray-50 transition-colors">
                     <td className="p-4 font-semibold text-[#DB4444]">
                       {order.queue_number}
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{order.customer_name}</div>
+                      <div className="font-medium text-gray-900">{order.customer_name}</div>
                       <div className="text-xs text-gray-500">
                         {order.customer_phone || "-"}
                       </div>
                     </td>
-                    <td className="p-4">{order.device_name}</td>
-                    <td className="p-4 max-w-xs truncate">{order.problem}</td>
-                    <td className="p-4">{order.technician_name || "-"}</td>
+                    <td className="p-4 text-gray-700">{order.device_name}</td>
+                    <td className="p-4 max-w-xs truncate text-gray-700" title={order.problem}>
+                      {order.problem}
+                    </td>
+                    <td className="p-4 text-gray-700">{order.technician_name || "-"}</td>
                     <td className="p-4">
                       <span
-                        className="px-3 py-1 rounded-full text-xs font-medium text-white whitespace-nowrap"
+                        className="px-3 py-1 rounded-full text-xs font-medium text-white whitespace-nowrap shadow-sm"
                         style={{
-                          backgroundColor:
-                            order.service_statuses?.color || "#DB4444",
+                          backgroundColor: order.service_statuses?.color || "#DB4444",
                         }}
                       >
                         {order.service_statuses?.name || "Unknown"}
                       </span>
                     </td>
-                    <td className="p-4 text-gray-500 text-xs">
+                    <td className="p-4 text-gray-500 text-xs whitespace-nowrap">
                       {new Date(order.created_at).toLocaleDateString("id-ID")}
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleEditClick(order)}
+                          className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          title="Edit Order"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(order)}
+                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Hapus Order"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -227,7 +318,7 @@ export const ServiceOrderSection = ({
             </button>
 
             <h2 className="text-2xl font-bold text-slate-900 mb-6">
-              Informasi Service Order
+              {editingOrder ? "Edit Service Order" : "Informasi Service Order"}
             </h2>
 
             <div className="space-y-5">
@@ -324,11 +415,15 @@ export const ServiceOrderSection = ({
               {/* ACTIONS */}
               <div className="flex gap-3 pt-4">
                 <button
-                  onClick={handleCreateOrder}
+                  onClick={handleSubmit}
                   disabled={isSubmitting}
                   className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all active:scale-95 disabled:opacity-70 flex justify-center items-center"
                 >
-                  {isSubmitting ? "Menyimpan..." : "Simpan Order"}
+                  {isSubmitting 
+                    ? "Menyimpan..." 
+                    : editingOrder 
+                      ? "Simpan Perubahan" 
+                      : "Simpan Order"}
                 </button>
 
                 <button
