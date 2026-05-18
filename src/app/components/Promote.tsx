@@ -26,7 +26,7 @@ export default function Promote() {
     <div className="bg-black text-white text-xs md:text-sm py-2 px-4 flex justify-center items-center relative">
       <p className="text-center w-full md:w-auto">
         {description}
-        <a href="#" className="font-bold underline ml-2">
+        <a href="/catalog" className="font-bold underline ml-2">
           Beli Sekarang
         </a>
       </p>
