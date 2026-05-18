@@ -69,7 +69,7 @@ export const ServiceOrderSection = ({
     try {
       if (editingOrder) {
         // --- PROSES UPDATE ---
-        const { data: updatedOrder, error: updateError } = await supabase
+        const { data, error: updateError } = await supabase
           .from("service_orders")
           .update({
             customer_name: customerName,
@@ -87,24 +87,28 @@ export const ServiceOrderSection = ({
               name,
               color
             )
-          `)
-          .single();
+          `);
 
         if (updateError) throw updateError;
+
+        // Ambil data pertama dengan aman tanpa .single()
+        const updatedOrder = data?.[0];
 
         // UPDATE UI
         if (updatedOrder) {
           setOrders((prev) =>
             prev.map((o) => (o.id === updatedOrder.id ? (updatedOrder as ServiceOrder) : o))
           );
+        } else {
+          // Fallback jika Supabase tidak mengembalikan data (misal karena RLS)
+          alert("Order berhasil diupdate, harap refresh halaman untuk melihat perubahan.");
         }
       } else {
         // --- PROSES CREATE ---
-        // Auto-generate Queue & Receipt Number sederhana
         const queueNumber = `Q-${Math.floor(1000 + Math.random() * 9000)}`;
         const receiptNumber = `INV-${Date.now()}`;
 
-        const { data: newOrder, error: insertError } = await supabase
+        const { data, error: insertError } = await supabase
           .from("service_orders")
           .insert({
             queue_number: queueNumber,
@@ -123,14 +127,19 @@ export const ServiceOrderSection = ({
               name,
               color
             )
-          `)
-          .single();
+          `);
 
         if (insertError) throw insertError;
 
-        // UPDATE UI (Tambahkan order baru ke urutan paling atas)
+        // Ambil data pertama dengan aman tanpa .single()
+        const newOrder = data?.[0];
+
+        // UPDATE UI
         if (newOrder) {
           setOrders((prev) => [newOrder as ServiceOrder, ...prev]);
+        } else {
+           // Fallback jika Supabase tidak mengembalikan data (misal karena RLS)
+           alert("Order berhasil dibuat, harap refresh halaman untuk melihat data terbaru.");
         }
       }
 
