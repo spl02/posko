@@ -57,25 +57,11 @@ const ProductCard = ({ product }: { product: Product }) => {
   return (
     <div className="flex flex-col group cursor-pointer w-full">
       <div className="relative bg-[#F5F5F5] rounded-md h-[250px] p-4 flex items-center justify-center overflow-hidden">
-        <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
-          <button className="bg-white p-1.5 rounded-full hover:bg-gray-100 transition">
-            <IconHeart />
-          </button>
-
-          <button className="bg-white p-1.5 rounded-full hover:bg-gray-100 transition">
-            <IconEye />
-          </button>
-        </div>
-
         <img
           src={product.image_url}
           alt={product.name}
           className="object-contain w-3/4 h-3/4 group-hover:scale-105 transition-transform duration-300"
         />
-
-        <button className="absolute bottom-0 left-0 w-full bg-black text-white py-2.5 font-medium opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-          Tambah ke Keranjang
-        </button>
       </div>
 
       <div className="mt-4 flex flex-col gap-1.5">
