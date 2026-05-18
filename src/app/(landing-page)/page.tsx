@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -53,7 +53,23 @@ const SectionHeader = ({
   </div>
 );
 
-const ProductCard = ({ product }: { product: Product }) => {
+const ProductCard = ({
+  product,
+  whatsappNumber,
+}: {
+  product: Product;
+  whatsappNumber?: string;
+}) => {
+  const whatsappLink = useMemo(() => {
+    const cleanNumber = whatsappNumber?.replace(/\D/g, "") || "";
+
+    const message = encodeURIComponent(
+      `Halo admin, apakah barang *${product.name}* masih tersedia?`,
+    );
+
+    return `https://wa.me/${cleanNumber}?text=${message}`;
+  }, [product.name, whatsappNumber]);
+
   return (
     <div className="flex flex-col group cursor-pointer w-full">
       <div className="relative bg-[#F5F5F5] rounded-md h-[250px] p-4 flex items-center justify-center overflow-hidden">
@@ -62,6 +78,15 @@ const ProductCard = ({ product }: { product: Product }) => {
           alt={product.name}
           className="object-contain w-3/4 h-3/4 group-hover:scale-105 transition-transform duration-300"
         />
+
+        <a
+          href={whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute bottom-0 left-0 w-full bg-[#25D366] text-white py-3 font-semibold opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 text-center"
+        >
+          Tanya via WhatsApp
+        </a>
       </div>
 
       <div className="mt-4 flex flex-col gap-1.5">
